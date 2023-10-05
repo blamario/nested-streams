@@ -1,4 +1,4 @@
-package main
+package pipe
 
 import "fmt"
 import "sync"
@@ -60,20 +60,4 @@ func Collector [of any] (buffer *[]of) func (<-chan of) {
 			*buffer = append(*buffer, item)
 		}
 	}
-}
-
-func main () {
-	runPipe(
-		func (sink chan<- int) {
-			sink <- 1
-			sink <- 2
-		},
-		func (source <-chan int) {
-			fmt.Println(<- source)
-			fmt.Println(<- source)
-		})
-	runPipe(Items([]int{5,6,7}), Printer[int])
-	var buffer []int;
-	runPipe(Items([]int{4,6,8}), Collector[int](&buffer))
-	fmt.Println(buffer)
 }
