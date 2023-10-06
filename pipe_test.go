@@ -2,6 +2,17 @@ package pipe
 
 import "testing"
 
+func compareSlices[item comparable](t *testing.T, xs, ys []item) {
+	if len(xs) != len(ys) {
+		t.Fail()
+	}
+	for i, n := range xs {
+		if n != ys[i] {
+			t.Fail()
+		}
+	}
+}
+
 func TestPipes(t *testing.T) {
 	runPipe(
 		func(sink chan<- int) {
@@ -18,28 +29,27 @@ func TestPipes(t *testing.T) {
 		})
 	var buffer []int
 	testItems := []int{4, 6, 8}
+
 	runPipe(Itemize(testItems), Collect[int](&buffer))
-	if len(buffer) != len(testItems) {
-		t.Fail()
-	}
-	for i, n := range buffer {
-		if n != testItems[i] {
-			t.Fail()
-		}
-	}
+	compareSlices(t, testItems, buffer)
+
+	buffer = nil
+	runPipe(pipeProducerTransducer(Itemize(testItems), Passthrough[int]), Collect[int](&buffer))
+	compareSlices(t, testItems, buffer)
+
+	buffer = nil
+	runPipe(pipeProducerTransducer(Itemize(testItems), Filter(func(x int) bool { return x != 6 })), Collect[int](&buffer))
+	compareSlices(t, []int{4, 8}, buffer)
+
+	buffer = nil
+	runPipe(pipeProducerTransducer(Itemize(testItems), Map(func(x int) float32 { return x / 2 })), Collect[int](&buffer))
+	compareSlices(t, []int{2, 3, 4}, buffer)
 }
 
 func FuzzPipes(f *testing.F) {
 	f.Fuzz(func(t *testing.T, testItems []byte) {
 		var buffer []byte
 		runPipe(Itemize(testItems), Collect[byte](&buffer))
-		if len(buffer) != len(testItems) {
-			t.Fail()
-		}
-		for i, n := range buffer {
-			if n != testItems[i] {
-				t.Fail()
-			}
-		}
+		compareSlices(t, testItems, buffer)
 	})
 }
