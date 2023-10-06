@@ -40,13 +40,13 @@ func pipeTransducerProducer[mid, out any](p Producer[mid], t Transducer[mid, out
 	}
 }
 
-func Printer[of any](source <-chan of) {
+func Print[of any](source <-chan of) {
 	for item := range source {
 		fmt.Println(item)
 	}
 }
 
-func Items[of any](from []of) func(chan<- of) {
+func Itemize[of any](from []of) func(chan<- of) {
 	return func(sink chan<- of) {
 		for _, item := range from {
 			sink <- item
@@ -54,7 +54,7 @@ func Items[of any](from []of) func(chan<- of) {
 	}
 }
 
-func Collector[of any](buffer *[]of) func(<-chan of) {
+func Collect[of any](buffer *[]of) func(<-chan of) {
 	return func(source <-chan of) {
 		for item := range source {
 			*buffer = append(*buffer, item)

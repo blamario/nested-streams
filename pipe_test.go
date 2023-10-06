@@ -18,7 +18,7 @@ func TestPipes(t *testing.T) {
 		})
 	var buffer []int
 	testItems := []int{4, 6, 8}
-	runPipe(Items(testItems), Collector[int](&buffer))
+	runPipe(Itemize(testItems), Collect[int](&buffer))
 	if len(buffer) != len(testItems) {
 		t.Fail()
 	}
@@ -32,7 +32,7 @@ func TestPipes(t *testing.T) {
 func FuzzPipes(f *testing.F) {
 	f.Fuzz(func(t *testing.T, testItems []byte) {
 		var buffer []byte
-		runPipe(Items(testItems), Collector[byte](&buffer))
+		runPipe(Itemize(testItems), Collect[byte](&buffer))
 		if len(buffer) != len(testItems) {
 			t.Fail()
 		}
